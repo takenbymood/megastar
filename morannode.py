@@ -9,14 +9,17 @@ from difflib import SequenceMatcher
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax,nFitness=0)
 
+targetString = "Shall I compare thee to a summer's day? Thou art more lovely and more temperate. Rough winds do shake the darling buds of May, And summer's lease hath all too short a date."
 legalChars = string.ascii_letters+" '.?,"
 
 def similar(a, b):
-	f = 1
+	f = 0
 	for i in range(len(a)):
-		d = abs(legalChars.index(a[i]) - legalChars.index(b[i]))
-		f += min(d,len(legalChars)-d)
-	return 1.0/f
+		# d = abs(legalChars.index(a[i]) - legalChars.index(b[i]))
+		# f += 1.0/(min(d,len(legalChars)-d)+1)
+		if a[i] == b[i]:
+			f+=1
+	return f
 
 class MoranNode:
 	def __init__(self,popsize):
@@ -28,7 +31,7 @@ class MoranNode:
 		self.toolbox.register("attr_letter",random.choice,legalChars)
 
 
-		self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_letter, n=39)
+		self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_letter, n=len(targetString))
 		self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
 		self.toolbox.register("evaluate", self.evalString)
@@ -51,20 +54,20 @@ class MoranNode:
 			if random.random() < indpb:
 				c = individual[i]
 				index = legalChars.index(c)
-				nindex = random.randint(index-1,index+1)
+				nindex = random.randint(0,len(legalChars))
 				if nindex >= len(legalChars):
 					nindex = nindex - len(legalChars)
 				individual[i] = legalChars[nindex]
 		return individual,
 
-	def evalString(self,individual,target="Shall I compare thee to a summer's day?"):
+	def evalString(self,individual,target=targetString):
 		return similar(''.join(individual),target),
 
 	def evalOneMax(self,individual):
 		return sum(individual),
 
 	def evaluateNode(self):
-		offspring = algorithms.varAnd(self.population, self.toolbox, cxpb=0.5, mutpb=0.1)
+		offspring = algorithms.varAnd(self.population, self.toolbox, cxpb=0.6, mutpb=0.25)
 		fits = self.toolbox.map(self.toolbox.evaluate, offspring)
 		for fit, ind in zip(fits, offspring):
 			ind.fitness.values = fit

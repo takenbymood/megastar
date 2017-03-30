@@ -5,6 +5,36 @@ import matplotlib.pyplot as plt
 import random
 import morannode as mn
 
+def createMegaStar(l,r,k,p=10):
+	G = nx.DiGraph()
+	G.add_node(0,mNode=mn.MoranNode(p))
+	G.add_node(1,mNode=mn.MoranNode(p))
+	cn = 2
+	npl = r+k
+	n = l*npl
+	for i in range(l):
+		for j in range(0,r):
+			G.add_node(cn,mNode=mn.MoranNode(p))
+			# G.add_edge(0,cn)
+			cn += 1
+		G.add_node(cn,mNode=mn.MoranNode(p))
+		an = cn
+		for j in range(0,r):
+			G.add_edge(an-j-1,an)
+		cn+=1
+		kn = cn
+		for j in range(0,k):
+			G.add_node(cn,mNode=mn.MoranNode(p))
+			G.add_edge(an,cn)
+			cn += 1
+		for j in range(0,k):
+			G.add_edge(kn+j,1)
+			for m in range(k):
+				if m != j:
+					G.add_edge(kn+j,kn+m)
+
+	return G
+
 def createBiStar(n,p=10):
 	G = nx.DiGraph()
 	G.add_node(0,mNode=mn.MoranNode(p))
@@ -127,37 +157,50 @@ class MoranGraph:
 
 def main():
 
-	islands = MoranGraph(createIslands(10,10))
+	islands = MoranGraph(createIslands(14,100))
 	star = MoranGraph(createStar(9,10))
 	bistar = MoranGraph(createBiStar(9,10))
 	singlet = MoranGraph(createSinglets(10,10))
+	megastar = MoranGraph(createMegaStar(2,4,3,100))
 
+	csv = "n,islands,megastar\n"
 
-	for gen in range(1000):
+	f = open('fitness.csv', 'w')
+	f.write(csv)
+
+	for gen in range(5000):
 
 
 		islands.evaluateNodes()
 		islands.moranProcess()
 
-		star.evaluateNodes()
-		star.moranProcess()
+		# star.evaluateNodes()
+		# star.moranProcess()
 
-		bistar.evaluateNodes()
-		bistar.moranProcess()
+		# bistar.evaluateNodes()
+		# bistar.moranProcess()
 
-		singlet.evaluateNodes()
-		singlet.moranProcess()
+		# singlet.evaluateNodes()
+		# singlet.moranProcess()
 
-		print (str(islands.getFittest()[1])+","+str(star.getFittest()[1])+","+str(bistar.getFittest()[1])+","+str(singlet.getFittest()[1]))
+		megastar.evaluateNodes()
+		megastar.moranProcess()
+
+		line = str(gen)+","+str(islands.getFittest()[1])+","+str(megastar.getFittest()[1])
+		print line
+		f.write(line+"\n")
 	
-	print ('islands --- ' + str(islands.getFittest()))
-	print ('star --- ' + str(star.getFittest()))
-	print ('bistar --- ' + str(bistar.getFittest()))
-	print ('singlet ---' + str(singlet.getFittest()))
+	
+	
+	print ('islands --- ' + str(islands.getFittest()[-1]))
+	# print ('star --- ' + str(star.getFittest()[-1]))
+	# print ('bistar --- ' + str(bistar.getFittest()[-1]))
+	print ('singlet ---' + str(singlet.getFittest()[-1]))
+	print ('megastar ---' + str(megastar.getFittest()[-1]))
 
-	#pos = nx.spring_layout(G.graph)
-	#nx.draw_networkx(G.graph, pos, cmap=plt.get_cmap('jet'),with_labels = True, edgelist=G.graph.edges(), arrows=True)
-	#plt.show()
+	# pos = nx.spring_layout(megastar.graph)
+	# nx.draw_networkx(megastar.graph, pos, cmap=plt.get_cmap('jet'),with_labels = True, edgelist=megastar.graph.edges(), arrows=True)
+	# plt.show()
 
 if __name__ == "__main__":
 	main()
