@@ -1,5 +1,6 @@
 import random
 from deap import creator, base, tools, algorithms
+import numpy
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax,nFitness=0)
@@ -11,7 +12,7 @@ class MoranNode:
 		self.toolbox = base.Toolbox()
 
 		self.toolbox.register("attr_bool", random.randint, 0, 1)
-		self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_bool, n=10)
+		self.toolbox.register("individual", tools.initRepeat, creator.Individual, self.toolbox.attr_bool, n=100)
 		self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
 		self.toolbox.register("evaluate", self.evalOneMax)
@@ -20,6 +21,14 @@ class MoranNode:
 		self.toolbox.register("select", tools.selTournament, tournsize=3)
 
 		self.population = self.toolbox.population(n=popsize)
+
+		hof = tools.HallOfFame(1)
+
+		stats = tools.Statistics(lambda ind: ind.fitness.values)
+		stats.register("avg", numpy.mean)
+		stats.register("std", numpy.std)
+		stats.register("min", numpy.min)
+		stats.register("max", numpy.max)
 
 	def evalOneMax(self,individual):
 		return sum(individual),
@@ -30,3 +39,4 @@ class MoranNode:
 		for fit, ind in zip(fits, offspring):
 			ind.fitness.values = fit
 		self.population = self.toolbox.select(offspring, k=len(self.population))
+		
