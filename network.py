@@ -15,7 +15,7 @@ def createMegaStar(l,r,k,p=10):
 	for i in range(l):
 		for j in range(0,r):
 			G.add_node(cn)
-			# G.add_edge(0,cn)
+			G.add_edge(0,cn)
 			cn += 1
 		G.add_node(cn)
 		an = cn

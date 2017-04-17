@@ -3,7 +3,7 @@ import toolbox as tb
 
 def main():
 
-	islands = mnet.MoranGraph(mnet.createMegaStar(4,3,3,10))
+	islands = mnet.MoranGraph(mnet.createIslands(40,10))
 
 	csv = "n,islands\n"
 
